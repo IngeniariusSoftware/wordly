@@ -15,8 +15,9 @@
       </div>
       <div style="align-self: center">
         <q-btn id="refresh-button" class="generate-button" round icon="refresh" size="1.5em" @mousedown="refreshGame"
-               @keydown.enter.prevent="handleInput"/>
-        <q-btn class="generate-button" round icon="add" size="1.5em" @focusin="isPopupFocused = true">
+               @keydown.enter.prevent="handleInput" :disabled="isGeneratingNewGame"/>
+        <q-btn class="generate-button" round icon="add" size="1.5em" @focusin="isPopupFocused = true"
+               :disabled="isGeneratingNewGame">
           <q-popup-edit auto-save v-model="newWord">
             <q-input v-model="newWord" dense autofocus counter @keyup.enter="handleNewWord"
                      @focusout="isPopupFocused = false"/>
@@ -58,12 +59,13 @@ export default {
       newWord: '',
       words,
       hiddenWord: wordsCsv[Math.floor(Math.random() * wordsCsv.length)].word.toUpperCase(),
-      isPopupFocused: false
+      isPopupFocused: false,
+      isGeneratingNewGame: false,
     }
   },
   methods: {
     handleInput(event) {
-      if (this.currentAttempt === this.attemptsCount || this.isPopupFocused) return
+      if (this.currentAttempt === this.attemptsCount || this.isPopupFocused || this.isGeneratingNewGame) return
 
       const input = event.key
 
@@ -200,9 +202,9 @@ export default {
     refreshGame() {
       const newWord = this.words[Math.floor(Math.random() * this.words.length)]
       this.newGame(newWord)
-      setTimeout(() => document.getElementById('main-container').focus(), 1000)
     },
     newGame(str) {
+      this.isGeneratingNewGame = true
       this.resetGame()
       this.hiddenWord = str
       this.showMessage('Новая игра')
@@ -210,6 +212,7 @@ export default {
     resetGame() {
       this.currentAttempt = 0
       this.currentLetterPosition = 0
+      this.usedWords = []
       this.grid.map((arr) => arr.map((x) => x.state = 'filled'))
       const characters = 'АБВГДЕЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ'
       let timerId = setInterval(() => this.grid.map((arr) => arr.map((x) => x.letter = characters[Math.floor(Math.random() * characters.length)])), 50)
@@ -219,6 +222,7 @@ export default {
           x.letter = ''
           x.state = ''
         }))
+        this.isGeneratingNewGame = false
       }, 1000)
     },
     showMessage(message) {
