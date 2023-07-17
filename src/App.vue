@@ -13,15 +13,17 @@
           {{ element.letter }}
         </div>
       </div>
-      <div style="align-self: center">
-        <q-btn id="refresh-button" class="generate-button" round icon="refresh" size="1.5em" @mousedown="refreshGame"
+      <div class="word-row">
+        <q-btn class="button" round icon="refresh" @mousedown="refreshGame"
                @keydown.enter.prevent="handleInput" :disabled="isGeneratingNewGame"/>
-        <q-btn class="generate-button" round icon="add" size="1.5em" @focusin="isPopupFocused = true"
-               :disabled="isGeneratingNewGame">
+        <q-btn class="button" round icon="add" @focusin="isPopupFocused = true" :disabled="isGeneratingNewGame">
           <q-popup-edit auto-save v-model="newWord">
             <q-input v-model="newWord" dense autofocus counter @keyup.enter="handleNewWord"
                      @focusout="isPopupFocused = false"/>
           </q-popup-edit>
+        </q-btn>
+        <q-btn class="button" round @mousedown="switchDifficulty">
+          {{ difficulty }}
         </q-btn>
       </div>
     </div>
@@ -39,7 +41,8 @@ export default {
     const words = []
 
     wordsCsv.forEach(function (x) {
-      words.push(x.word.toUpperCase())
+      x.word = x.word.toUpperCase()
+      words.push(x.word)
     })
 
     const quasar = useQuasar()
@@ -58,9 +61,12 @@ export default {
       usedWords: [],
       newWord: '',
       words,
-      hiddenWord: wordsCsv[Math.floor(Math.random() * wordsCsv.length)].word.toUpperCase(),
+      wordsFrequencies: wordsCsv,
       isPopupFocused: false,
       isGeneratingNewGame: false,
+      difficulty: 1,
+      maxDifficulty: 3,
+      hiddenWord: '',
     }
   },
   methods: {
@@ -181,7 +187,7 @@ export default {
       }
     },
     tryEncrypt(message) {
-      const key = this.generateRandomString(this.keyLength)
+      const key = generateRandomString(this.keyLength)
       return key + CryptoJS.AES.encrypt(message, key).toString()
     },
     tryDecrypt(encrypted) {
@@ -200,13 +206,12 @@ export default {
       return false
     },
     refreshGame() {
-      const newWord = this.words[Math.floor(Math.random() * this.words.length)]
-      this.newGame(newWord)
+      this.newGame(this.chooseNewWord())
     },
-    newGame(str) {
+    newGame(word) {
       this.isGeneratingNewGame = true
       this.resetGame()
-      this.hiddenWord = str
+      this.hiddenWord = word
       this.showMessage('Новая игра')
     },
     resetGame() {
@@ -215,7 +220,7 @@ export default {
       this.usedWords = []
       this.grid.map((arr) => arr.map((x) => x.state = 'filled'))
       const characters = 'АБВГДЕЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ'
-      let timerId = setInterval(() => this.grid.map((arr) => arr.map((x) => x.letter = characters[Math.floor(Math.random() * characters.length)])), 50)
+      let timerId = setInterval(() => this.grid.map((arr) => arr.map((x) => x.letter = randomChoice(characters))), 50)
       setTimeout(() => {
         clearInterval(timerId)
         this.grid.map((arr) => arr.map((x) => {
@@ -232,17 +237,14 @@ export default {
         position: 'top',
       })
     },
-    generateRandomString(length) {
-      const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
-      const charactersLength = characters.length
-      let result = ''
-      const randomValues = new Uint32Array(length)
-      window.crypto.getRandomValues(randomValues)
-      randomValues.forEach((value) => {
-        result += characters.charAt(value % charactersLength)
-      })
-
-      return result
+    switchDifficulty() {
+      this.difficulty = 1 + (this.difficulty % this.maxDifficulty)
+      this.showMessage(`Сложность изменена на ${this.difficulty}`)
+    },
+    chooseNewWord() {
+      const length = this.wordsFrequencies.length / this.maxDifficulty * this.difficulty
+      console.log(length)
+      return randomChoice(this.wordsFrequencies, length).word
     }
   },
   mounted() {
@@ -256,7 +258,25 @@ export default {
     document.addEventListener('keydown', (event) => {
       this.handleInput(event)
     })
+    this.refreshGame()
   },
+}
+
+function generateRandomString(length) {
+  const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
+  const charactersLength = characters.length
+  let result = ''
+  const randomValues = new Uint32Array(length)
+  window.crypto.getRandomValues(randomValues)
+  randomValues.forEach((value) => {
+    result += characters.charAt(value % charactersLength)
+  })
+
+  return result
+}
+
+function randomChoice(choices, length = choices.length) {
+  return choices[Math.floor(length * Math.random())];
 }
 
 </script>
@@ -267,8 +287,8 @@ export default {
   display: flex;
   align-items: center;
   justify-content: center;
-  height: 100vh;
   background-color: #121212;
+  height: 100vh;
 }
 
 .word-grid {
@@ -284,25 +304,24 @@ export default {
 }
 
 .letter-cell {
-  width: 110px;
-  height: 110px;
+  width: min(10vw, 10vh);
+  height: min(10vw, 10vh);
   border: 1px solid #404040;
   display: flex;
   align-items: center;
   justify-content: center;
-  font: 80px bolder Roboto, -apple-system, Helvetica Neue, Helvetica, Arial, sans-serif;
-  margin: 4px;
+  font: min(10vw, 10vh) bolder Roboto, -apple-system, Helvetica Neue, Helvetica, Arial, sans-serif;
+  margin: min(0.45vw, 0.45vh);
   color: #FFF;
 }
 
-.generate-button {
-  width: 60px;
-  align-self: center;
+.button {
+  font-size: min(2.5vw, 2.5vh);
   color: #404040;
   border: 1px solid #404040;
-  margin-top: 20px;
-  margin-left: 10px;
-  margin-right: 10px;
+  margin-top: min(2.5vw, 2.5vh);
+  margin-left: min(1.6vw, 1.6vh);
+  margin-right: min(1.6vw, 1.6vh);
 }
 
 .filled {
