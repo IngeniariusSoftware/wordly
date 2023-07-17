@@ -13,7 +13,7 @@
           {{ element.letter }}
         </div>
       </div>
-      <div style="align-self: center">
+      <div class="word-row">
         <q-btn class="button" round icon="refresh" @mousedown="refreshGame"
                @keydown.enter.prevent="handleInput" :disabled="isGeneratingNewGame"/>
         <q-btn class="button" round icon="add" @focusin="isPopupFocused = true" :disabled="isGeneratingNewGame">
@@ -243,6 +243,7 @@ export default {
     },
     chooseNewWord() {
       const length = this.wordsFrequencies.length / this.maxDifficulty * this.difficulty
+      console.log(length)
       return randomChoice(this.wordsFrequencies, length).word
     }
   },
@@ -286,8 +287,8 @@ function randomChoice(choices, length = choices.length) {
   display: flex;
   align-items: center;
   justify-content: center;
-  height: 100vh;
   background-color: #121212;
+  height: 100vh;
 }
 
 .word-grid {
@@ -303,25 +304,24 @@ function randomChoice(choices, length = choices.length) {
 }
 
 .letter-cell {
-  width: 110px;
-  height: 110px;
+  width: min(10vw, 10vh);
+  height: min(10vw, 10vh);
   border: 1px solid #404040;
   display: flex;
   align-items: center;
   justify-content: center;
-  font: 80px bolder Roboto, -apple-system, Helvetica Neue, Helvetica, Arial, sans-serif;
-  margin: 4px;
+  font: min(10vw, 10vh) bolder Roboto, -apple-system, Helvetica Neue, Helvetica, Arial, sans-serif;
+  margin: min(0.45vw, 0.45vh);
   color: #FFF;
 }
 
 .button {
-  font-size: 1.5em;
-  align-self: center;
+  font-size: min(2.5vw, 2.5vh);
   color: #404040;
   border: 1px solid #404040;
-  margin-top: 20px;
-  margin-left: 10px;
-  margin-right: 10px;
+  margin-top: min(2.5vw, 2.5vh);
+  margin-left: min(1.6vw, 1.6vh);
+  margin-right: min(1.6vw, 1.6vh);
 }
 
 .filled {
