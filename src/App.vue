@@ -1,8 +1,5 @@
 <template>
-  <div v-if="isNotificationVisible" class="notification">
-    {{ notificationMessage }}
-  </div>
-  <div id="main-container" class="word-grid-container">
+  <div class="word-grid-container">
     <div class="word-grid">
       <div v-for="(row, y) in grid" :key="y" class="word-row">
         <div
@@ -13,18 +10,42 @@
           {{ element.letter }}
         </div>
       </div>
-      <div class="word-row">
-        <q-btn class="button" round icon="refresh" @mousedown="refreshGame"
-               @keydown.enter.prevent="handleInput" :disabled="isGeneratingNewGame"/>
+      <div class="button-row">
+        <q-btn class="button" round icon="refresh" @mousedown="refreshGame" @mouseleave="focusBody"
+               :disabled="isGeneratingNewGame"/>
         <q-btn class="button" round icon="add" @focusin="isPopupFocused = true" :disabled="isGeneratingNewGame">
           <q-popup-edit auto-save v-model="newWord">
             <q-input v-model="newWord" dense autofocus counter @keyup.enter="handleNewWord"
                      @focusout="isPopupFocused = false"/>
           </q-popup-edit>
         </q-btn>
-        <q-btn class="button" round @mousedown="switchDifficulty">
+        <q-btn class="button" round @mousedown="switchDifficulty" @mouseleave="focusBody">
           {{ difficulty }}
         </q-btn>
+      </div>
+      <div v-for="(row, y) in keyboard.slice(0, 2)" :key="y" class="word-row">
+        <q-btn
+            v-for="(element, x) in row"
+            :key="x"
+            :class="['key', element.state]"
+            @mousedown="handleInput({key: element.key})"
+            @mouseleave="focusBody"
+        >
+          {{ element.key }}
+        </q-btn>
+      </div>
+      <div class="word-row">
+        <q-btn class="key" icon="backspace" @mousedown="handleInput({key: 'Backspace'})" @mouseleave="focusBody"/>
+        <q-btn
+            v-for="(element, x) in keyboard[2]"
+            :key="x"
+            :class="['key', element.state]"
+            @mousedown="handleInput({key: element.key})"
+            @mouseleave="focusBody"
+        >
+          {{ element.key }}
+        </q-btn>
+        <q-btn class="key" icon="input" @mousedown="handleInput({key: 'Enter'})" @mouseleave="focusBody"/>
       </div>
     </div>
   </div>
@@ -48,8 +69,24 @@ export default {
     const quasar = useQuasar()
     quasar.dark.set(true)
 
+    const keyboard = []
+    const letters = {}
+    const russianLetters = [['Й', 'Ц', 'У', 'К', 'Е', 'Н', 'Г', 'Ш', 'Щ', 'З', 'Х', 'Ъ'],
+      ['Ф', 'Ы', 'В', 'А', 'П', 'Р', 'О', 'Л', 'Д', 'Ж', 'Э'], ['Я', 'Ч', 'С', 'М', 'И', 'Т', 'Ь', 'Б', 'Ю']]
+
+    for (let i = 0; i < russianLetters.length; i++) {
+      keyboard.push(Array(russianLetters[i].length))
+      for (let j = 0; j < russianLetters[i].length; j++) {
+        const key = {key: russianLetters[i][j], state: ''}
+        letters[russianLetters[i][j]] = key
+        keyboard[i][j] = key
+      }
+    }
+
     return {
       grid: [],
+      keyboard,
+      letters,
       wordLength: 5,
       attemptsCount: 6,
       currentAttempt: 0,
@@ -82,6 +119,9 @@ export default {
       } else if (input === 'Backspace') {
         this.tryRemoveLetters(event.ctrlKey)
       }
+    },
+    focusBody() {
+      document.activeElement.blur()
     },
     tryAddLetter(input) {
       if (this.currentLetterPosition >= this.wordLength) return
@@ -123,14 +163,21 @@ export default {
     },
     checkWord(word) {
       this.grid[this.currentAttempt].map((cell, i) => {
-        const isEnoughLetters = this.countLetters(this.hiddenWord, cell.letter) >= this.countLetters(word, cell.letter, 0, i + 1)
+        const wordLetterCount = this.countLetters(this.hiddenWord, cell.letter)
+        const isEnoughLetters = wordLetterCount >= this.countLetters(word, cell.letter, 0, i + 1)
 
         if (isEnoughLetters) {
           if (cell.letter === this.hiddenWord[i]) {
             cell.state = 'correct-letter-position'
+            this.letters[cell.letter].state = 'correct-letter-position'
           } else {
             cell.state = 'wrong-letter-position'
+            if (this.letters[cell.letter].state !== 'correct-letter-position') {
+              this.letters[cell.letter].state = 'wrong-letter-position'
+            }
           }
+        } else if (wordLetterCount === 0) {
+          this.letters[cell.letter].state = 'absent-letter-position'
         }
       })
     },
@@ -220,6 +267,9 @@ export default {
       this.usedWords = []
       this.grid.map((arr) => arr.map((x) => x.state = 'filled'))
       const characters = 'АБВГДЕЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ'
+      this.keyboard.map((arr) => arr.map((x) => {
+        x.state = ''
+      }))
       let timerId = setInterval(() => this.grid.map((arr) => arr.map((x) => x.letter = randomChoice(characters))), 50)
       setTimeout(() => {
         clearInterval(timerId)
@@ -239,16 +289,14 @@ export default {
     },
     switchDifficulty() {
       this.difficulty = 1 + (this.difficulty % this.maxDifficulty)
-      this.showMessage(`Сложность изменена на ${this.difficulty}`)
+      this.showMessage(`Сложность следующего загаданного слова изменена на ${this.difficulty}`)
     },
     chooseNewWord() {
       const length = this.wordsFrequencies.length / this.maxDifficulty * this.difficulty
-      console.log(length)
       return randomChoice(this.wordsFrequencies, length).word
     }
   },
   mounted() {
-    this.grid = []
     for (let i = 0; i < this.attemptsCount; i++) {
       this.grid.push(Array(this.wordLength))
       for (let j = 0; j < this.wordLength; j++) {
@@ -294,8 +342,7 @@ function randomChoice(choices, length = choices.length) {
 .word-grid {
   display: flex;
   flex-direction: column;
-  padding-top: 50px;
-  border-radius: 5px;
+  padding-top: min(5vh, 5vw);
 }
 
 .word-row {
@@ -303,50 +350,69 @@ function randomChoice(choices, length = choices.length) {
   justify-content: center;
 }
 
+.button-row {
+  display: flex;
+  justify-content: center;
+  margin-top: min(2vh, 2vw);
+  margin-bottom: min(2.5vh, 2.5vw);
+}
+
 .letter-cell {
-  width: min(10vw, 10vh);
-  height: min(10vw, 10vh);
+  width: min(9vw, 9vh);
+  height: min(9vw, 9vh);
   border: 1px solid #404040;
   display: flex;
-  align-items: center;
   justify-content: center;
-  font: min(10vw, 10vh) bolder Roboto, -apple-system, Helvetica Neue, Helvetica, Arial, sans-serif;
-  margin: min(0.45vw, 0.45vh);
+  font: min(6vw, 6vh) bolder ui-sans-serif, system-ui, -apple-system,
+  BlinkMacSystemFont, Segoe UI, Roboto, Helvetica Neue, Arial, Noto Sans, sans-serif,
+  Apple Color Emoji, Segoe UI Emoji, Segoe UI Symbol, Noto Color Emoji;
+  margin: min(0.4vw, 0.4vh);
   color: #FFF;
 }
 
+.key {
+  border-radius: min(0.5vw, 0.5vh);
+  display: flex;
+  width: min(6vw, 6vh);
+  height: min(6vw, 6vh);
+  font: min(2.2vw, 2.2vh) ui-sans-serif, system-ui, -apple-system,
+  BlinkMacSystemFont, Segoe UI, Roboto, Helvetica Neue, Arial, Noto Sans, sans-serif,
+  Apple Color Emoji, Segoe UI Emoji, Segoe UI Symbol, Noto Color Emoji;
+  padding: 1%;
+  margin: min(0.35vw, 0.35vh);
+  background-color: #818384;
+  color: #FFF;
+
+}
+
 .button {
-  font-size: min(2.5vw, 2.5vh);
+  width: min(6vw, 6vh);
+  height: min(6vw, 6vh);
+  font-size: min(2vw, 2vh);
   color: #404040;
   border: 1px solid #404040;
-  margin-top: min(2.5vw, 2.5vh);
-  margin-left: min(1.6vw, 1.6vh);
-  margin-right: min(1.6vw, 1.6vh);
+  margin-left: min(2vw, 2vh);
+  margin-right: min(2vw, 2vh);
 }
 
 .filled {
   background-color: #404040;
 }
 
+.absent-letter-position {
+  transition: background-color 2s;
+  background-color: #404040;
+}
+
 .wrong-letter-position {
-  transition-duration: 2s;
+  transition: background-color 2s;
   background-color: #C9B458;
 }
 
 .correct-letter-position {
-  transition-duration: 2s;
+  transition: background-color 2s;
   background-color: #6AAA64;
 
-}
-
-.notification {
-  position: fixed;
-  top: 20px;
-  right: 20px;
-  padding: 10px 20px;
-  background-color: #333;
-  color: #FFF;
-  border-radius: 4px;
 }
 
 </style>
