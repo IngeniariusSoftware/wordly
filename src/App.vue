@@ -286,6 +286,7 @@ export default {
           x.state = ''
         }))
         this.isGeneratingNewGame = false
+        this.focusBody()  
       }, 1000)
     },
     showMessage(message) {
