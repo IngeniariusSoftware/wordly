@@ -187,7 +187,7 @@ export default {
         if (this.grid[this.currentAttempt][i].state !== 'correct-letter-position') return
       }
 
-      this.showMessage('😊🎉🌟😻')
+      setTimeout(() => this.showMessage('😊🎉🌟😻'), 1000)
     },
     tryRemoveLetters(isRemovingAllLetters) {
       if (this.currentLetterPosition === 0) return
