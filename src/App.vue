@@ -373,7 +373,7 @@ function randomChoice(choices, length = choices.length) {
   display: flex;
   align-items: center;
   justify-content: center;
-  font: min(12vw, 7vh) bolder ui-sans-serif, system-ui, -apple-system,
+  font: min(11vw, 6vh) bolder ui-sans-serif, system-ui, -apple-system,
   BlinkMacSystemFont, Segoe UI, Roboto, Helvetica Neue, Arial, Noto Sans, sans-serif,
   Apple Color Emoji, Segoe UI Emoji, Segoe UI Symbol, Noto Color Emoji;
   margin: min(0.4vw, 0.4vh);
