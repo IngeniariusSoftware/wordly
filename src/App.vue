@@ -153,6 +153,7 @@ export default {
 
       this.usedWords.push(word)
       this.checkWord(word)
+      this.checkWin(word)
       this.currentLetterPosition = 0
       this.currentAttempt++
 
@@ -180,6 +181,13 @@ export default {
           this.letters[cell.letter].state = 'absent-letter-position'
         }
       })
+    },
+    checkWin() {
+      for (let i = 0; i < this.wordLength; i++) {
+        if (this.grid[this.currentAttempt][i].state !== 'correct-letter-position') return
+      }
+
+      this.showMessage('😊🎉🌟😻')
     },
     tryRemoveLetters(isRemovingAllLetters) {
       if (this.currentLetterPosition === 0) return
