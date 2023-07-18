@@ -362,17 +362,18 @@ function randomChoice(choices, length = choices.length) {
 .button-row {
   display: flex;
   justify-content: center;
-  margin-top: min(2vh, 2vw);
-  margin-bottom: min(2.5vh, 2.5vw);
+  margin-top: min(3vw, 2vh);
+  margin-bottom: min(3.5vw, 2.5vh);
 }
 
 .letter-cell {
-  width: min(9vw, 9vh);
-  height: min(9vw, 9vh);
+  width: min(17vw, 9vh);
+  height: min(17vw, 9vh);
   border: 1px solid #404040;
   display: flex;
+  align-items: center;
   justify-content: center;
-  font: min(6vw, 6vh) bolder ui-sans-serif, system-ui, -apple-system,
+  font: min(11vw, 6vh) bolder ui-sans-serif, system-ui, -apple-system,
   BlinkMacSystemFont, Segoe UI, Roboto, Helvetica Neue, Arial, Noto Sans, sans-serif,
   Apple Color Emoji, Segoe UI Emoji, Segoe UI Symbol, Noto Color Emoji;
   margin: min(0.4vw, 0.4vh);
@@ -380,28 +381,28 @@ function randomChoice(choices, length = choices.length) {
 }
 
 .key {
-  border-radius: min(0.5vw, 0.5vh);
+  border-radius: min(1vw, 1vh);
   display: flex;
-  width: min(6vw, 6vh);
-  height: min(6vw, 6vh);
-  font: min(2.2vw, 2.2vh) ui-sans-serif, system-ui, -apple-system,
+  width: min(6.9vw, 6.4vh);
+  height: min(6.9vw, 6.4vh);
+  font: min(2.6vw, 2.4vh) ui-sans-serif, system-ui, -apple-system,
   BlinkMacSystemFont, Segoe UI, Roboto, Helvetica Neue, Arial, Noto Sans, sans-serif,
   Apple Color Emoji, Segoe UI Emoji, Segoe UI Symbol, Noto Color Emoji;
   padding: 1%;
-  margin: min(0.35vw, 0.35vh);
+  margin: min(0.4vw, 0.4vh);
   background-color: #818384;
   color: #FFF;
 
 }
 
 .button {
-  width: min(6vw, 6vh);
-  height: min(6vw, 6vh);
-  font-size: min(2vw, 2vh);
+  width: min(11vw, 6vh);
+  height: min(11vw, 6vh);
+  font-size: min(4vw, 2vh);
   color: #404040;
   border: 1px solid #404040;
-  margin-left: min(2vw, 2vh);
-  margin-right: min(2vw, 2vh);
+  margin-left: min(3vw, 2vh);
+  margin-right: min(3vw, 2vh);
 }
 
 .filled {
