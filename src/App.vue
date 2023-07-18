@@ -35,7 +35,7 @@
         </q-btn>
       </div>
       <div class="word-row">
-        <q-btn class="key" icon="backspace" @mousedown="handleInput({key: 'Backspace'})" @mouseleave="focusBody"/>
+        <q-btn class="key wide-key" icon="input" @mousedown="handleInput({key: 'Enter'})" @mouseleave="focusBody"/>
         <q-btn
             v-for="(element, x) in keyboard[2]"
             :key="x"
@@ -45,7 +45,7 @@
         >
           {{ element.key }}
         </q-btn>
-        <q-btn class="key" icon="input" @mousedown="handleInput({key: 'Enter'})" @mouseleave="focusBody"/>
+        <q-btn class="key wide-key" icon="backspace" @mousedown="handleInput({key: 'Backspace'})" @mouseleave="focusBody"/>
       </div>
     </div>
   </div>
@@ -72,7 +72,7 @@ export default {
     const keyboard = []
     const letters = {}
     const russianLetters = [['Й', 'Ц', 'У', 'К', 'Е', 'Н', 'Г', 'Ш', 'Щ', 'З', 'Х', 'Ъ'],
-      ['Ф', 'Ы', 'В', 'А', 'П', 'Р', 'О', 'Л', 'Д', 'Ж', 'Э'], ['Я', 'Ч', 'С', 'М', 'И', 'Т', 'Ь', 'Б', 'Ю']]
+      ['Ф', 'Ы', 'В', 'А', 'П', 'Р', 'О', 'Л', 'Д', 'Ж', 'Э', 'Я'], ['Ч', 'С', 'М', 'И', 'Т', 'Ь', 'Б', 'Ю']]
 
     for (let i = 0; i < russianLetters.length; i++) {
       keyboard.push(Array(russianLetters[i].length))
@@ -367,8 +367,8 @@ function randomChoice(choices, length = choices.length) {
 }
 
 .letter-cell {
-  width: min(17vw, 9vh);
-  height: min(17vw, 9vh);
+  width: min(18.5vw, 8vh);
+  height: min(18.5vw, 8vh);
   border: 1px solid #404040;
   display: flex;
   align-items: center;
@@ -383,8 +383,8 @@ function randomChoice(choices, length = choices.length) {
 .key {
   border-radius: min(1vw, 1vh);
   display: flex;
-  width: min(6.9vw, 6.4vh);
-  height: min(6.9vw, 6.4vh);
+  width: min(7.3vw, 6.9vh);
+  height: min(7.3vw, 6.9vh);
   font: min(2.6vw, 2.4vh) ui-sans-serif, system-ui, -apple-system,
   BlinkMacSystemFont, Segoe UI, Roboto, Helvetica Neue, Arial, Noto Sans, sans-serif,
   Apple Color Emoji, Segoe UI Emoji, Segoe UI Symbol, Noto Color Emoji;
@@ -392,7 +392,10 @@ function randomChoice(choices, length = choices.length) {
   margin: min(0.4vw, 0.4vh);
   background-color: #818384;
   color: #FFF;
+}
 
+.wide-key {
+  width: min(15.3vw, 14.3vh);
 }
 
 .button {
