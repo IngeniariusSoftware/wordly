@@ -45,7 +45,8 @@
         >
           {{ element.key }}
         </q-btn>
-        <q-btn class="key wide-key" icon="backspace" @mousedown="handleInput({key: 'Backspace'})" @mouseleave="focusBody"/>
+        <q-btn class="key wide-key" icon="backspace" @mousedown="handleInput({key: 'Backspace'})"
+               @mouseleave="focusBody"/>
       </div>
     </div>
   </div>
@@ -104,6 +105,28 @@ export default {
       difficulty: 1,
       maxDifficulty: 3,
       hiddenWord: '',
+    }
+  },
+  mounted() {
+    for (let i = 0; i < this.attemptsCount; i++) {
+      this.grid.push(Array(this.wordLength))
+      for (let j = 0; j < this.wordLength; j++) {
+        this.grid[i][j] = {letter: '', state: ''}
+      }
+    }
+
+    document.addEventListener('keydown', (event) => {
+      this.handleInput(event)
+    })
+
+    let queryString = window.location.search;
+    let urlParams = new URLSearchParams(queryString);
+
+    if (urlParams.has('word')) {
+      this.newWord = urlParams.get('word')
+      this.handleNewWord()
+    } else {
+      this.refreshGame()
     }
   },
   methods: {
@@ -218,7 +241,7 @@ export default {
     },
     handleNewWord() {
       if (this.newWord.length === 0) return
-
+      
       let message = ''
       if (this.newWord.match('^[а-яА-Я]+$')) {
         if (this.newWord.length < this.wordLength) {
@@ -229,8 +252,10 @@ export default {
           message = 'В словаре игры нет такого слова, попробуйте другое'
         } else {
           const encrypted = this.tryEncrypt(this.newWord.toUpperCase())
-          navigator.clipboard.writeText(encrypted)
-          message = 'Токен слова успешно скопирован в буфер обмена'
+          const searchURL = new URL(window.location)
+          searchURL.searchParams.set('word', encrypted)
+          navigator.clipboard.writeText(searchURL.toString())
+          message = 'Ссылка успешно скопирована в буфер обмена'
           this.newWord = ''
         }
       } else {
@@ -256,8 +281,7 @@ export default {
       const key = encrypted.slice(0, this.keyLength)
       encrypted = encrypted.slice(this.keyLength, encrypted.length)
       const decrypted = CryptoJS.AES.decrypt(encrypted, key)
-
-      return  decrypted.toString(CryptoJS.enc.Utf8).toUpperCase()
+      return decrypted.toString(CryptoJS.enc.Utf8).toUpperCase()
     },
     refreshGame() {
       this.newGame(this.chooseNewWord())
@@ -304,18 +328,6 @@ export default {
       const length = this.wordsFrequencies.length / this.maxDifficulty * this.difficulty
       return randomChoice(this.wordsFrequencies, length).word
     }
-  },
-  mounted() {
-    for (let i = 0; i < this.attemptsCount; i++) {
-      this.grid.push(Array(this.wordLength))
-      for (let j = 0; j < this.wordLength; j++) {
-        this.grid[i][j] = {letter: '', state: ''}
-      }
-    }
-    document.addEventListener('keydown', (event) => {
-      this.handleInput(event)
-    })
-    this.refreshGame()
   },
 }
 
