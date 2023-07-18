@@ -11,15 +11,15 @@
         </div>
       </div>
       <div class="button-row">
-        <q-btn class="button" round icon="refresh" @mousedown="refreshGame"
-               @keydown.enter.prevent="handleInput" :disabled="isGeneratingNewGame"/>
+        <q-btn class="button" round icon="refresh" @mousedown="refreshGame" @mouseleave="focusBody"
+               :disabled="isGeneratingNewGame"/>
         <q-btn class="button" round icon="add" @focusin="isPopupFocused = true" :disabled="isGeneratingNewGame">
           <q-popup-edit auto-save v-model="newWord">
             <q-input v-model="newWord" dense autofocus counter @keyup.enter="handleNewWord"
                      @focusout="isPopupFocused = false"/>
           </q-popup-edit>
         </q-btn>
-        <q-btn class="button" round @mousedown="switchDifficulty">
+        <q-btn class="button" round @mousedown="switchDifficulty" @mouseleave="focusBody">
           {{ difficulty }}
         </q-btn>
       </div>
@@ -29,21 +29,23 @@
             :key="x"
             :class="['key', element.state]"
             @mousedown="handleInput({key: element.key})"
+            @mouseleave="focusBody"
         >
           {{ element.key }}
         </q-btn>
       </div>
       <div class="word-row">
-        <q-btn class="key" icon="backspace" @mousedown="handleInput({key: 'Backspace'})"/>
+        <q-btn class="key" icon="backspace" @mousedown="handleInput({key: 'Backspace'})" @mouseleave="focusBody"/>
         <q-btn
             v-for="(element, x) in keyboard[2]"
             :key="x"
             :class="['key', element.state]"
             @mousedown="handleInput({key: element.key})"
+            @mouseleave="focusBody"
         >
           {{ element.key }}
         </q-btn>
-        <q-btn class="key" icon="input" @mousedown="handleInput({key: 'Enter'})"/>
+        <q-btn class="key" icon="input" @mousedown="handleInput({key: 'Enter'})" @mouseleave="focusBody"/>
       </div>
     </div>
   </div>
@@ -75,7 +77,7 @@ export default {
     for (let i = 0; i < russianLetters.length; i++) {
       keyboard.push(Array(russianLetters[i].length))
       for (let j = 0; j < russianLetters[i].length; j++) {
-        const key  = {key: russianLetters[i][j], state: ''}
+        const key = {key: russianLetters[i][j], state: ''}
         letters[russianLetters[i][j]] = key
         keyboard[i][j] = key
       }
@@ -117,6 +119,9 @@ export default {
       } else if (input === 'Backspace') {
         this.tryRemoveLetters(event.ctrlKey)
       }
+    },
+    focusBody() {
+      document.activeElement.blur()
     },
     tryAddLetter(input) {
       if (this.currentLetterPosition >= this.wordLength) return
@@ -370,7 +375,7 @@ function randomChoice(choices, length = choices.length) {
   display: flex;
   width: min(6vw, 6vh);
   height: min(6vw, 6vh);
-  font: min(2.2vw, 2.2vh)ui-sans-serif, system-ui, -apple-system,
+  font: min(2.2vw, 2.2vh) ui-sans-serif, system-ui, -apple-system,
   BlinkMacSystemFont, Segoe UI, Roboto, Helvetica Neue, Arial, Noto Sans, sans-serif,
   Apple Color Emoji, Segoe UI Emoji, Segoe UI Symbol, Noto Color Emoji;
   padding: 1%;
