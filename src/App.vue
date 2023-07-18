@@ -233,8 +233,13 @@ export default {
           message = 'Токен слова успешно скопирован в буфер обмена'
           this.newWord = ''
         }
-      } else if (!this.tryDecrypt(this.newWord)) {
-        message = 'Некорректный токен'
+      } else {
+        const newWord = this.tryDecrypt(this.newWord)
+        if (newWord.match('[А-Я]{5}')) {
+          this.newGame(newWord)
+        } else {
+          message = 'Некорректный токен'
+        }
       }
 
       if (message) {
@@ -246,19 +251,13 @@ export default {
       return key + CryptoJS.AES.encrypt(message, key).toString()
     },
     tryDecrypt(encrypted) {
-      if (encrypted.length <= this.keyLength) return false
+      if (encrypted.length <= this.keyLength) return ''
 
       const key = encrypted.slice(0, this.keyLength)
       encrypted = encrypted.slice(this.keyLength, encrypted.length)
       const decrypted = CryptoJS.AES.decrypt(encrypted, key)
-      const newWord = decrypted.toString(CryptoJS.enc.Utf8).toUpperCase()
 
-      if (newWord.match('[А-Я]{5}')) {
-        this.newGame(newWord)
-        return true
-      }
-
-      return false
+      return  decrypted.toString(CryptoJS.enc.Utf8).toUpperCase()
     },
     refreshGame() {
       this.newGame(this.chooseNewWord())
@@ -268,6 +267,7 @@ export default {
       this.resetGame()
       this.hiddenWord = word
       this.showMessage('Новая игра')
+      this.newWord = ''
     },
     resetGame() {
       this.currentAttempt = 0
@@ -286,7 +286,7 @@ export default {
           x.state = ''
         }))
         this.isGeneratingNewGame = false
-        this.focusBody()  
+        this.focusBody()
       }, 1000)
     },
     showMessage(message) {
